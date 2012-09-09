@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<displayName>APC Cache</displayName>
+	<shortDescription>This package contains a cache mechanism that relies on the APC caching system.
+	For this cache to work, the APC Pecl package must be enabled.</shortDescription>
+	<docUrl></docUrl>
+	<logo>logo.png</logo>
+	<dependencies>
+		<dependency>
+			<group>utils/cache</group>
+			<name>cache-interface</name>
+			<version>&gt;=1.0</version>
+		</dependency>
+		<dependency>
+			<group>utils/cache</group>
+			<name>no-cache</name>
+			<version>&gt;=1.1</version>
+		</dependency>
+		<dependency>
+			<group>utils/common</group>
+			<name>conditioninterface</name>
+			<version>&gt;=1.0</version>
+		</dependency>
+	</dependencies>
+	<requires>
+		<require>ApcCacheException.php</require>
+		<require>ApcCache.php</require>
+	</requires>
+	<install>
+		<file>install.php</file>
+	</install>	
+</package>
