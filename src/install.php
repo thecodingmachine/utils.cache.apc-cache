@@ -8,15 +8,6 @@ InstallUtils::init(InstallUtils::$INIT_APP);
 // Let's create the instance
 $moufManager = MoufManager::getMoufManager();
 if (!$moufManager->instanceExists("apcCacheService")) {
-	$moufManager->declareComponent("apcCacheService", "ApcCache");
-	if ($moufManager->instanceExists("errorLogLogger")) {
-		$moufManager->bindComponent("apcCacheService", "log", "errorLogLogger");
-	}
-}
-
-// Let's create the instance
-$moufManager = MoufManager::getMoufManager();
-if (!$moufManager->instanceExists("apcCacheService")) {
 	$apcCacheService = $moufManager->createInstance("Mouf\\Utils\\Cache\\ApcCache");
 	$apcCacheService->setName("apcCacheService");
 	$apcCacheService->getProperty("defaultTimeToLive")->setValue(3600);
