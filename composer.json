@@ -3,7 +3,7 @@
     "description": "This package contains a cache mechanism that relies on the APC caching system. For this cache to work, the APC Pecl package must be enabled.",
     "keywords": ["mouf", "cache", "apc"],
     "homepage": "https://github.com/thecodingmachine/utils.cache.apc-cache",
-    "type": "library",
+    "type": "mouf-library",
     "license": "MIT",
     "authors": [
         {
