@@ -143,7 +143,8 @@ class ApcCache implements CacheInterface {
 	public function purge($key) {
 		$this->init();
 		if ($this->useFallback) {
-			return $this->fallback->purge($key);
+			$this->fallback->purge($key);
+			return;
 		}
 		
 		if ($this->log) {
@@ -158,6 +159,12 @@ class ApcCache implements CacheInterface {
 	 *
 	 */
 	public function purgeAll() {
+		$this->init();
+		if ($this->useFallback) {
+			$this->fallback->purgeAll();
+			return;
+		}		
+		
 		apc_clear_cache('user');
 	}
 	
