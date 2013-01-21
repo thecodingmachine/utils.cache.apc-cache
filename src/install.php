@@ -22,6 +22,10 @@ if (!$moufManager->instanceExists("apcCacheService")) {
 	if ($moufManager->instanceExists("errorLogLogger")) {
 		$apcCacheService->getProperty("log")->setValue($moufManager->getInstanceDescriptor("errorLogLogger"));
 	}
+	
+	if ($moufManager->instanceExists("fileCacheService")) {
+		$apcCacheService->getProperty("fallback")->setValue($moufManager->getInstanceDescriptor("fileCacheService"));
+	}
 }
 
 // Let's rewrite the MoufComponents.php file to save the component
