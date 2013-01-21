@@ -30,7 +30,10 @@
 	    			"type": "file",
 	    			"file": "src/install.php"
 	    		}
-	    	]
+	    	],
+			"require-admin": [
+    			"src/declareApcValidator.php"
+    		]
     	}
     }
 }
