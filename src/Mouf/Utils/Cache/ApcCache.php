@@ -4,7 +4,7 @@ namespace Mouf\Utils\Cache;
 /**
  * This package contains a cache mechanism that relies on APC.
  * 
- * @Component
+ * @author David Negrier
  */
 class ApcCache implements CacheInterface {
 	
@@ -13,16 +13,22 @@ class ApcCache implements CacheInterface {
 	 * Please note that if the session is flushed, all the elements of the cache will disapear anyway.
 	 * If empty, the time to live will be the time of the session. 
 	 *
-	 * @Property
 	 * @var int
 	 */
 	public $defaultTimeToLive;
 	
 	/**
+	 * A prefix to be added to all the keys of the cache. Very useful to avoid conflicting name between different instances.
+	 * Note: the prefix is NOT added if the fallback service is used.
+	 * 
+	 * @var string
+	 */
+	public $prefix = "";
+	
+	/**
 	 * The fallback cache service to use if APC is not available on the host.
 	 * If no fallback mechanism is passed and APC is not available, an exception will be triggered.
 	 * 
-	 * @Property
 	 * @var CacheInterface
 	 */
 	public $fallback;
@@ -30,7 +36,6 @@ class ApcCache implements CacheInterface {
 	/**
 	 * The logger used to trace the cache activity.
 	 *
-	 * @Property
 	 * @var LogInterface
 	 */
 	public $log;
@@ -39,7 +44,6 @@ class ApcCache implements CacheInterface {
 	 * If there is a condition interface, and if it returns false, APC cache will
 	 * be disabled, and the fallback mechanism will be used instead.
 	 * 
-	 * @Property
 	 * @var ConditionInterface
 	 */
 	public $condition;
@@ -85,16 +89,16 @@ class ApcCache implements CacheInterface {
 		}
 		
 		$success = false;
-		$value = apc_fetch($key, $success);
+		$value = apc_fetch($this->prefix.$key, $success);
 		
 		if ($success) {
 			if ($this->log) {
-				$this->log->trace("Retrieving key '$key' from file cache.");
+				$this->log->trace("Retrieving key '{$this->prefix}{$key}' from file cache.");
 			}
 			return $value;
 		} else {
 			if ($this->log) {
-				$this->log->trace("Retrieving key '$key' from file cache: cache miss");
+				$this->log->trace("Retrieving key '{$this->prefix}{$key}' from file cache: cache miss");
 			}
 			return null;
 		}
@@ -114,7 +118,7 @@ class ApcCache implements CacheInterface {
 		}
 		
 		if ($this->log) {
-			$this->log->trace("Storing value in APC cache: key '$key'.");
+			$this->log->trace("Storing value in APC cache: key '{$this->prefix}{$key}'.");
 		}
 		
 		if ($timeToLive == null) {
@@ -127,10 +131,10 @@ class ApcCache implements CacheInterface {
 			$timeOut = time() + $timeToLive;
 		}
 		
-		$ret = apc_store($key, $value, $timeOut);
+		$ret = apc_store($this->prefix.$key, $value, $timeOut);
 		if ($ret == false) {
 			if ($this->log) {
-				$this->log->error("Error while caching the key '$key' with value '".var_export($value, true)."' in APC cache.");
+				$this->log->error("Error while caching the key '{$this->prefix}{$key}' with value '".var_export($value, true)."' in APC cache.");
 			}
 		}
 	}
@@ -148,10 +152,10 @@ class ApcCache implements CacheInterface {
 		}
 		
 		if ($this->log) {
-			$this->log->trace("Purging key '$key' from APC cache.");
+			$this->log->trace("Purging key '{$this->prefix}{$key}' from APC cache.");
 		}
 		
-		apc_delete($key);
+		apc_delete($this->prefix.$key);
 	}
 	
 	/**
@@ -165,8 +169,16 @@ class ApcCache implements CacheInterface {
 			return;
 		}		
 		
-		apc_clear_cache('user');
+		if (empty($this->prefix)) {
+			apc_clear_cache('user');
+		} else {
+			$info = apc_cache_info("user");
+			foreach ($info['cache_list'] as $obj) {
+				if (strpos($obj['info'], $this->prefix) === 0) {
+					apc_delete($obj['info']);
+				}
+			}
+		}
 	}
-	
 }
 ?>
