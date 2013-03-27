@@ -1,12 +1,15 @@
 <?php
 namespace Mouf\Utils\Cache;
 
+use Mouf\Validator\MoufValidatorInterface;
+use Mouf\Validator\MoufValidatorResult;
+
 /**
  * This package contains a cache mechanism that relies on APC.
  * 
  * @author David Negrier
  */
-class ApcCache implements CacheInterface {
+class ApcCache implements CacheInterface, MoufValidatorInterface {
 	
 	/**
 	 * The default time to live of elements stored in the session (in seconds).
@@ -177,6 +180,24 @@ class ApcCache implements CacheInterface {
 				if (strpos($obj['info'], $this->prefix) === 0) {
 					apc_delete($obj['info']);
 				}
+			}
+		}
+	}
+	
+	/**
+	 * Runs the validation of the class.
+	 * Returns a MoufValidatorResult explaining the result.
+	 *
+	 * @return MoufValidatorResult
+	 */
+	public function validateInstance() {		
+		if (extension_loaded("apc")) {
+			return new MoufValidatorResult(MoufValidatorResult::SUCCESS, "APC extension found");
+		} else {
+			if ($this->fallback) {
+				return new MoufValidatorResult(MoufValidatorResult::WARN, "APC extension is not installed. The APCCache service will use the configured fallback method instead.");
+			} else {
+				return new MoufValidatorResult(MoufValidatorResult::ERROR, "APC extension is not installed. No fallback method configured.");
 			}
 		}
 	}
