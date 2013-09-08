@@ -3,6 +3,7 @@ namespace Mouf\Utils\Cache;
 
 use Mouf\Validator\MoufValidatorInterface;
 use Mouf\Validator\MoufValidatorResult;
+use Psr\Log\LoggerInterface;
 
 /**
  * This package contains a cache mechanism that relies on APC.
@@ -38,8 +39,9 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 	
 	/**
 	 * The logger used to trace the cache activity.
+	 * Supports both PSR3 compatible logger and old Mouf logger for compatibility reasons.
 	 *
-	 * @var LogInterface
+	 * @var LoggerInterface|LogInterface
 	 */
 	public $log;
 	
@@ -96,12 +98,20 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 		
 		if ($success) {
 			if ($this->log) {
-				$this->log->trace("Retrieving key '{$this->prefix}{$key}' from file cache.");
+				if ($this->log instanceof LoggerInterface) {
+					$this->log->info("Retrieving key '{key}' from APC cache.", array('key'=>$key));
+				} else {
+					$this->log->trace("Retrieving key '$key' from APC cache.");
+				}						
 			}
 			return $value;
 		} else {
 			if ($this->log) {
-				$this->log->trace("Retrieving key '{$this->prefix}{$key}' from file cache: cache miss");
+				if ($this->log instanceof LoggerInterface) {
+					$this->log->info("Retrieving key '{key}' from APC cache: key outdated, cache miss.", array('key'=>$key));
+				} else {
+					$this->log->trace("Retrieving key '$key' from APC cache: key outdated, cache miss.");
+				}
 			}
 			return null;
 		}
@@ -121,7 +131,11 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 		}
 		
 		if ($this->log) {
-			$this->log->trace("Storing value in APC cache: key '{$this->prefix}{$key}'.");
+			if ($this->log instanceof LoggerInterface) {
+				$this->log->info("Storing value in APC cache: key '{prefix}{key}'", array('prefix'=>$this->prefix, 'key'=>$key));
+			} else {
+				$this->log->trace("Storing value in APC cache: key '{$this->prefix}{$key}'");
+			}
 		}
 		
 		if ($timeToLive == null) {
@@ -155,7 +169,11 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 		}
 		
 		if ($this->log) {
-			$this->log->trace("Purging key '{$this->prefix}{$key}' from APC cache.");
+			if ($this->log instanceof LoggerInterface) {
+				$this->log->info("Purging key '{prefix}{key}' from APC cache.", array('prefix'=>$this->prefix, 'key'=>$key));
+			} else {
+				$this->log->trace("Purging key '{$this->prefix}{$key}' from APC cache.");
+			}
 		}
 		
 		apc_delete($this->prefix.$key);
@@ -171,6 +189,14 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 			$this->fallback->purgeAll();
 			return;
 		}		
+		
+		if ($this->log) {
+			if ($this->log instanceof LoggerInterface) {
+				$this->log->info("Purging APC cache.");
+			} else {
+				$this->log->trace("Purging APC cache.");
+			}
+		}
 		
 		if (empty($this->prefix)) {
 			apc_clear_cache('user');
