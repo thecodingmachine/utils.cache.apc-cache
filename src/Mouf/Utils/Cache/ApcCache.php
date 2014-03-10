@@ -203,8 +203,15 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 		} else {
 			$info = apc_cache_info("user");
 			foreach ($info['cache_list'] as $obj) {
-				if (strpos($obj['info'], $this->prefix) === 0) {
-					apc_delete($obj['info']);
+				// Note: APC has an 'info' key and early versions of APCu have a 'key' key instead...
+				if (isset($obj['info'])) {
+					if (strpos($obj['info'], $this->prefix) === 0) {
+						apc_delete($obj['info']);
+					}
+				} else {
+					if (strpos($obj['key'], $this->prefix) === 0) {
+						apc_delete($obj['key']);
+					}
 				}
 			}
 		}
