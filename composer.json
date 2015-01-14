@@ -17,6 +17,7 @@
     	"mouf/utils.cache.cache-interface": "~2.0",
     	"mouf/utils.cache.file-cache": "~2.0",
     	"mouf/utils.log.psr.errorlog_logger": "~2.0",
+        "mouf/utils.constants.secret" : "~1.0",
     	"mouf/mouf-validators-interface": "~2.0"
     },
     "autoload": {
@@ -28,8 +29,8 @@
     	"mouf": {
 	    	"install": [
 	    		{
-	    			"type": "file",
-	    			"file": "src/install.php"
+	    			"type": "class",
+	    			"class": "Mouf\\Utils\\Cache\\ApcCacheInstaller"
 	    		}
 	    	],
     		"logo": "logo.png"
