@@ -25,7 +25,6 @@ class ApcCacheInstaller implements PackageInstallerInterface {
             $apcCacheService = $moufManager->createInstance("Mouf\\Utils\\Cache\\ApcCache");
             $apcCacheService->setName("apcCacheService");
             $apcCacheService->getProperty("defaultTimeToLive")->setValue(3600);
-            $apcCacheService->getProperty("prefix")->setValue('SECRET')->setOrigin('config');
 
             /*if ($moufManager->instanceExists("errorLogLogger")) {
                 $apcCacheService->getProperty("log")->setValue($moufManager->getInstanceDescriptor("errorLogLogger"));
@@ -40,8 +39,8 @@ class ApcCacheInstaller implements PackageInstallerInterface {
 
         $configManager = $moufManager->getConfigManager();
         $constants = $configManager->getMergedConstants();
-        if (isset($constants['ROOT_URL'])) {
-            $apcCacheService->getProperty('prefix')->setValue('ROOT_URL')->setOrigin('config');
+        if (isset($constants['SECRET'])) {
+            $apcCacheService->getProperty('prefix')->setValue('SECRET')->setOrigin('config');
         }
 
         // Let's rewrite the MoufComponents.php file to save the component
