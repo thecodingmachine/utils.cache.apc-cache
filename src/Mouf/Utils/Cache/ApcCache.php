@@ -62,14 +62,14 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 			return;
 		}
 		
-		if (!extension_loaded("apc")) {
+		if (!extension_loaded("apcu")) {
 			if ($this->fallback) {
 				if ($this->log) {
-					$this->log->info("APC extension not available. Using fallback.");
+					$this->log->info("APCU extension not available. Using fallback.");
 				}
 				$this->useFallback = true;
 			} else {
-				throw new ApcCacheException("APC is not available and no fallback mechanism has been passed.");
+				throw new ApcCacheException("APCU is not available and no fallback mechanism has been passed.");
 			}
 		}
 		
@@ -94,7 +94,7 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 		}
 		
 		$success = false;
-		$value = apc_fetch($this->prefix.$key, $success);
+		$value = apcu_fetch($this->prefix.$key, $success);
 		
 		if ($success) {
 			if ($this->log) {
@@ -148,7 +148,7 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 			$timeOut = time() + $timeToLive;
 		}
 		
-		$ret = apc_store($this->prefix.$key, $value, $timeOut);
+		$ret = apcu_store($this->prefix.$key, $value, $timeOut);
 		if ($ret == false) {
 			if ($this->log) {
 				$this->log->error("Error while caching the key '{$this->prefix}{$key}' with value '".var_export($value, true)."' in APC cache.");
@@ -175,8 +175,8 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 				$this->log->trace("Purging key '{$this->prefix}{$key}' from APC cache.");
 			}
 		}
-		
-		apc_delete($this->prefix.$key);
+
+		apcu_delete($this->prefix.$key);
 	}
 	
 	/**
@@ -199,18 +199,18 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 		}
 		
 		if (empty($this->prefix)) {
-			apc_clear_cache('user');
+			apcu_clear_cache();
 		} else {
-			$info = apc_cache_info("user");
+			$info = apcu_cache_info();
 			foreach ($info['cache_list'] as $obj) {
 				// Note: APC has an 'info' key and early versions of APCu have a 'key' key instead...
 				if (isset($obj['info'])) {
 					if (strpos($obj['info'], $this->prefix) === 0) {
-						apc_delete($obj['info']);
+						apcu_delete($obj['info']);
 					}
 				} else {
 					if (strpos($obj['key'], $this->prefix) === 0) {
-						apc_delete($obj['key']);
+						apcu_delete($obj['key']);
 					}
 				}
 			}
@@ -223,14 +223,14 @@ class ApcCache implements CacheInterface, MoufValidatorInterface {
 	 *
 	 * @return MoufValidatorResult
 	 */
-	public function validateInstance() {		
-		if (extension_loaded("apc")) {
-			return new MoufValidatorResult(MoufValidatorResult::SUCCESS, "APC extension found");
+	public function validateInstance() {
+		if (extension_loaded("apcu")) {
+			return new MoufValidatorResult(MoufValidatorResult::SUCCESS, "APCU extension found");
 		} else {
 			if ($this->fallback) {
-				return new MoufValidatorResult(MoufValidatorResult::WARN, "APC extension is not installed. The APCCache service will use the configured fallback method instead.");
+				return new MoufValidatorResult(MoufValidatorResult::WARN, "APCU extension is not installed. The APCCache service will use the configured fallback method instead.");
 			} else {
-				return new MoufValidatorResult(MoufValidatorResult::ERROR, "APC extension is not installed. No fallback method configured.");
+				return new MoufValidatorResult(MoufValidatorResult::ERROR, "APCU extension is not installed. No fallback method configured.");
 			}
 		}
 	}
